@@ -22,12 +22,12 @@ public class Item {
     private List<Bid> bids = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
-    private Seller seller;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User seller;
 
     private Item() {}
 
-    public Item(Long id, String itemName, List<Bid> bids, Seller seller) {
+    public Item(Long id, String itemName, List<Bid> bids, User seller) {
         this.id = id;
         this.itemName = itemName;
         this.bids = bids;
@@ -74,11 +74,11 @@ public class Item {
         this.bids = bids;
     }
 
-    public Seller getSeller() {
+    public User getSeller() {
         return seller;
     }
 
-    public void setSeller(Seller seller) {
+    public void setSeller(User seller) {
         this.seller = seller;
     }
 

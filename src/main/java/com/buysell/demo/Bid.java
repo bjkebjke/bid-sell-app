@@ -13,8 +13,8 @@ public class Bid {
     private int bidVal;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id", nullable = false)
-    private Buyer buyer;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
@@ -22,7 +22,7 @@ public class Bid {
 
     private Bid() {}
 
-    public Bid(Long id, int bidVal, Buyer buyer, Item item) {
+    public Bid(Long id, int bidVal, User buyer, Item item) {
         this.id = id;
         this.bidVal = bidVal;
         this.buyer = buyer;
@@ -61,11 +61,11 @@ public class Bid {
         this.bidVal = bidVal;
     }
 
-    public Buyer getBuyer() {
+    public User getBuyer() {
         return buyer;
     }
 
-    public void setBuyer(Buyer buyer) {
+    public void setBuyer(User buyer) {
         this.buyer = buyer;
     }
 

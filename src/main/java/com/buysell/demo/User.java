@@ -11,53 +11,60 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name="sellers")
-public class Seller {
-
+@Table(name = "users")
+public class User {
     public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     private @Id
     @GeneratedValue
     Long id;
-
     private String name;
 
     @OneToMany(
-            mappedBy = "sellers",
+            mappedBy = "users",
+            orphanRemoval = true
+    )
+    private List<Bid> bids = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "users",
             orphanRemoval = true
     )
     private List<Item> items = new ArrayList<>();
 
-    private @JsonIgnore String password;
+    private @JsonIgnore
+    String password;
+
+    //private @Version @JsonIgnore Long version;
 
     private String[] roles;
 
-    public void setPassword(String password) {
-        this.password = PASSWORD_ENCODER.encode(password);
-    }
+    protected User() {}
 
-    public Seller(String name, List<Item> items, String password, String[] roles) {
+    public User(String name, List<Bid> bids, List<Item> items, String password, String[] roles) {
         this.name = name;
+        this.bids = bids;
         this.items = items;
-        this.setPassword(password);
+        this.password = password;
         this.roles = roles;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Seller)) return false;
-        Seller seller = (Seller) o;
-        return Objects.equals(id, seller.id) &&
-                Objects.equals(name, seller.name) &&
-                Objects.equals(items, seller.items) &&
-                Objects.equals(password, seller.password) &&
-                Arrays.equals(roles, seller.roles);
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(bids, user.bids) &&
+                Objects.equals(items, user.items) &&
+                Objects.equals(password, user.password) &&
+                Arrays.equals(roles, user.roles);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, name, items, password);
+        int result = Objects.hash(id, name, bids, items, password);
         result = 31 * result + Arrays.hashCode(roles);
         return result;
     }
@@ -78,6 +85,14 @@ public class Seller {
         this.name = name;
     }
 
+    public List<Bid> getBids() {
+        return bids;
+    }
+
+    public void setBids(List<Bid> bids) {
+        this.bids = bids;
+    }
+
     public List<Item> getItems() {
         return items;
     }
@@ -90,6 +105,10 @@ public class Seller {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = PASSWORD_ENCODER.encode(password);
+    }
+
     public String[] getRoles() {
         return roles;
     }
@@ -100,9 +119,10 @@ public class Seller {
 
     @Override
     public String toString() {
-        return "Seller{" +
+        return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", bids=" + bids +
                 ", items=" + items +
                 ", roles=" + Arrays.toString(roles) +
                 '}';
