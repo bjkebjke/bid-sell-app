@@ -8,29 +8,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 public class MyUserDetailsService implements UserDetailsService {
-    private final SellerRepository sellers;
-    private final BuyerRepository buyers;
+    private final UserRepository users;
 
     @Autowired
-    public MyUserDetailsService(SellerRepository sellers, BuyerRepository buyers) {
-        this.sellers = sellers;
-        this.buyers = buyers;
+    public MyUserDetailsService(UserRepository users) {
+        this.users = users;
     }
 
     @Override
     public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
-        if(this.sellers.findByName(name)!=null) {
-            Seller seller = this.sellers.findByName(name);
-            return new User(seller.getName(), seller.getPassword(),
-                    AuthorityUtils.createAuthorityList(seller.getRoles()));
-        } else {
-            Buyer buyer = this.buyers.findByName(name);
-            return new User(buyer.getName(), buyer.getPassword(),
-                    AuthorityUtils.createAuthorityList(buyer.getRoles()));
-        }
+        String n = this.users.findByName(name).getName();
+        String pw = this.users.findByName(name).getPassword();
+        String[] roles = this.users.findByName(name).getRoles();
+
+        return new User(n, pw, AuthorityUtils.createAuthorityList(roles));
     }
 }

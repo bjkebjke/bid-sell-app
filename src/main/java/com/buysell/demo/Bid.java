@@ -22,8 +22,7 @@ public class Bid {
 
     private Bid() {}
 
-    public Bid(Long id, int bidVal, User buyer, Item item) {
-        this.id = id;
+    public Bid(int bidVal, User buyer, Item item) {
         this.bidVal = bidVal;
         this.buyer = buyer;
         this.item = item;

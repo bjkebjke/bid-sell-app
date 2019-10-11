@@ -16,7 +16,7 @@ public class Item {
     private String itemName;
 
     @OneToMany(
-            mappedBy = "items",
+            mappedBy = "item",
             orphanRemoval = true
     )
     private List<Bid> bids = new ArrayList<>();
@@ -27,8 +27,7 @@ public class Item {
 
     private Item() {}
 
-    public Item(Long id, String itemName, List<Bid> bids, User seller) {
-        this.id = id;
+    public Item(String itemName, List<Bid> bids, User seller) {
         this.itemName = itemName;
         this.bids = bids;
         this.seller = seller;

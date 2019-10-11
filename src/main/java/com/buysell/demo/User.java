@@ -1,6 +1,7 @@
 package com.buysell.demo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -13,6 +14,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "users")
 public class User {
+
     public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     private @Id
@@ -21,13 +23,13 @@ public class User {
     private String name;
 
     @OneToMany(
-            mappedBy = "users",
+            mappedBy = "buyer",
             orphanRemoval = true
     )
     private List<Bid> bids = new ArrayList<>();
 
     @OneToMany(
-            mappedBy = "users",
+            mappedBy = "seller",
             orphanRemoval = true
     )
     private List<Item> items = new ArrayList<>();
@@ -41,11 +43,11 @@ public class User {
 
     protected User() {}
 
-    public User(String name, List<Bid> bids, List<Item> items, String password, String[] roles) {
+    public User(String name, List<Bid> bids, List<Item> items, String password, String... roles) {
         this.name = name;
         this.bids = bids;
         this.items = items;
-        this.password = password;
+        this.setPassword(password);
         this.roles = roles;
     }
 
