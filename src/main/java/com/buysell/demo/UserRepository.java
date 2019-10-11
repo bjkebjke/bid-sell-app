@@ -3,9 +3,9 @@ package com.buysell.demo;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface SellerRepository {
+public interface UserRepository {
 
-    Seller save(Seller seller);
+    User save(User seller);
 
-    Seller findByName(String name);
+    User findByName(String name);
 }
