@@ -28,8 +28,8 @@ public class DatabaseLoader implements CommandLineRunner {
     public void run(String... strings) throws Exception {
         User bob = new User("bob", null, null, "bobpw", "SELLER");
 
-        Item bobItem1 = new Item("item b1", null, bob);
-        Item bobItem2 = new Item("item b2", null, bob);
+        Item bobItem1 = new Item("item b1", null, bob, "a fine first item");
+        Item bobItem2 = new Item("item b2", null, bob, "bob's second item");
 
         List<Item> bobsitems = new ArrayList<>();
 
@@ -46,8 +46,8 @@ public class DatabaseLoader implements CommandLineRunner {
                         AuthorityUtils.createAuthorityList("SELLER")));
 
 
-        this.items.save(bobItem1);
-        this.items.save(bobItem2);
+        Item item1clone = this.items.save(bobItem1);
+        Item item2clone = this.items.save(bobItem2);
 
         SecurityContextHolder.clearContext();
     }

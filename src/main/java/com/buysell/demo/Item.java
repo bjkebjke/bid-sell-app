@@ -15,6 +15,8 @@ public class Item {
 
     private String itemName;
 
+    private String description;
+
     @OneToMany(
             mappedBy = "item",
             orphanRemoval = true
@@ -27,10 +29,11 @@ public class Item {
 
     private Item() {}
 
-    public Item(String itemName, List<Bid> bids, User seller) {
+    public Item(String itemName, List<Bid> bids, User seller, String description) {
         this.itemName = itemName;
         this.bids = bids;
         this.seller = seller;
+        this.description = description;
     }
 
     @Override
@@ -38,15 +41,16 @@ public class Item {
         if (this == o) return true;
         if (!(o instanceof Item)) return false;
         Item item = (Item) o;
-        return Objects.equals(id, item.id) &&
-                Objects.equals(itemName, item.itemName) &&
-                Objects.equals(bids, item.bids) &&
-                Objects.equals(seller, item.seller);
+        return Objects.equals(getId(), item.getId()) &&
+                Objects.equals(getItemName(), item.getItemName()) &&
+                Objects.equals(description, item.description) &&
+                Objects.equals(getBids(), item.getBids()) &&
+                Objects.equals(getSeller(), item.getSeller());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, itemName, bids, seller);
+        return Objects.hash(getId(), getItemName(), description, getBids(), getSeller());
     }
 
     public Long getId() {
@@ -81,11 +85,20 @@ public class Item {
         this.seller = seller;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
                 "id=" + id +
                 ", itemName='" + itemName + '\'' +
+                ", description='" + description + '\'' +
                 ", bids=" + bids +
                 ", seller=" + seller +
                 '}';

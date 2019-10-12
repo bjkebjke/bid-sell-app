@@ -1,9 +1,11 @@
 HELP.md
 target/
 node_modules/
+built/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+
 built/
 
 ### STS ###

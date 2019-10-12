@@ -10,11 +10,11 @@ export default class CreateDialog extends React.Component {
 
 	handleSubmit(e) {
 		e.preventDefault();
-		const newEmployee = {};
+		const newUserObj = {};
 		this.props.attributes.forEach(attribute => {
-			newEmployee[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim();
+			newUserObj[attribute] = ReactDOM.findDOMNode(this.refs[attribute]).value.trim();
 		});
-		this.props.onCreate(newEmployee);
+		this.props.onCreate(newUserObj);
 
 		// clear out the dialog's inputs
 		this.props.attributes.forEach(attribute => {
