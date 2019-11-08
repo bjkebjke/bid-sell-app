@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>Bid Sell Demo</title>
+    <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+<h2>New Item</h2>
+<form action="#" th:action="@{/items/save}" method="post" th:object="${item}">
+    <table border="1">
+        <tr>
+            <td>Name: </td>
+            <td><input type="text" th:field="*{name}"/></td>
+        </tr>
+        <tr>
+            <td>Description: </td>
+            <td><input type="text" th:field="*{description}"/></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Submit" /></td>
+        </tr>
+    </table>
+</form>
+
+</body>
+</html>

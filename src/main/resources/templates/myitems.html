@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>Bid Sell Demo</title>
+    <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+<h1>All personal items</h1>
+<h3><a href="/home">Go back home</a></h3>
+<table>
+    <tr>
+        <th>NAME</th>
+        <th>DESCRIPTION</th>
+    </tr>
+    <tr th:each="item: ${myitems}">
+        <td th:text="${item.itemName}" />
+        <td th:text="${item.description}" />
+    </tr>
+</table>
+</body>
+</html>

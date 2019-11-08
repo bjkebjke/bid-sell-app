@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from "react-dom"
 
 
 export default class CreateDialog extends React.Component {
@@ -40,7 +41,7 @@ export default class CreateDialog extends React.Component {
 					<div>
 						<a href="#" title="Close" className="close">X</a>
 
-						<h2>Create new employee</h2>
+						<h2>Upload new item</h2>
 
 						<form>
 							{inputs}
