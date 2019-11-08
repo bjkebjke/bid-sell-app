@@ -32,7 +32,7 @@ public class Bid extends DateAudit implements Comparable<Bid> {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Bid() {}
+    public Bid() {}
 
     public Bid(int bidVal, Long itemid, Long userid) {
         this.bidVal = bidVal;

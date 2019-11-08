@@ -44,7 +44,7 @@ public class Item extends UserDateAudit {
     @NotNull
     private Instant expirationDateTime;
 
-    protected Item() {}
+    public Item() {}
 
     public Item(String itemName, List<Bid> bids, Long userid, String description) {
         this.itemName = itemName;

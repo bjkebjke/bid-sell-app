@@ -4,14 +4,28 @@ import com.buysell.demo.entity.Bid;
 import com.buysell.demo.entity.Item;
 import com.buysell.demo.model.BidDAO;
 import com.buysell.demo.model.ItemDAO;
+import com.buysell.demo.payload.*;
+import com.buysell.demo.repository.BidRepository;
+import com.buysell.demo.repository.ItemRepository;
+import com.buysell.demo.repository.UserRepository;
+import com.buysell.demo.security.CurrentUser;
+import com.buysell.demo.security.UserPrincipal;
 import com.buysell.demo.service.ItemService;
 import com.buysell.demo.service.UserService;
+import com.buysell.demo.util.AppConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.Collections;
 
 @Controller
@@ -19,10 +33,63 @@ import java.util.Collections;
 public class ItemController {
 
     @Autowired
-    ItemService itemService;
+    private ItemRepository itemRepository;
+
+    @Autowired
+    private BidRepository bidRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
+
+    @Autowired
+    private ItemService itemService;
 
     @Autowired
     UserService userService;
+
+    @GetMapping
+    public PagedResponse<ItemResponse> getItems(@CurrentUser UserPrincipal currentUser,
+                                                @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+                                                @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
+        return itemService.getAllItems(currentUser, page, size);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> postItem(@Valid @RequestBody ItemRequest itemRequest) {
+        Item item = itemService.postItem(itemRequest);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{pollId}")
+                .buildAndExpand(item.getId()).toUri();
+
+        return ResponseEntity.created(location)
+                .body(new ApiResponse(true, "Item Uploaded Successfully"));
+    }
+
+    @GetMapping("/{itemId}")
+    public ItemResponse getItemById(@CurrentUser UserPrincipal currentUser,
+                                    @PathVariable Long itemId) {
+        return itemService.getItemById(itemId, currentUser);
+    }
+
+    @PostMapping("/{itemId}/bids")
+    @PreAuthorize("hasRole('USER')")
+    public ItemResponse makeBid(@CurrentUser UserPrincipal currentUser,
+                                 @PathVariable Long itemId,
+                                 @Valid @RequestBody BidRequest bidRequest) {
+        return itemService.makeBidAndGetUpdatedItem(itemId, bidRequest, currentUser);
+    }
+
+
+
+    //old
+
+
+
+
 
     @RequestMapping(value = "/{id}")
     public String itemPage(Model model, @PathVariable("id") Long itemId) {

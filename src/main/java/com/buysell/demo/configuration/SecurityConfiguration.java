@@ -1,6 +1,9 @@
-package com.buysell.demo.security;
+package com.buysell.demo.configuration;
 
 import com.buysell.demo.entity.User;
+import com.buysell.demo.security.JwtAuthenticationEntryPoint;
+import com.buysell.demo.security.JwtAuthenticationFilter;
+import com.buysell.demo.security.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

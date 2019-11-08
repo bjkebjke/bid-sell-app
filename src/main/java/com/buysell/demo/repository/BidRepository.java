@@ -22,10 +22,10 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Bid findTop1ByItemIdOrderByBidValDesc(Long itemId);
 
     @Query("SELECT b FROM Bid b where b.user.id = :userId and b.item.id in :itemIds")
-    List<Bid> findByUserIdAndPollIdIn(@Param("userId") Long userId, @Param("itemIds") List<Long> itemIds);
+    List<Bid> findByUserIdAndItemIdIn(@Param("userId") Long userId, @Param("itemIds") List<Long> itemIds);
 
     @Query("SELECT b FROM Bid b where b.user.id = :userId and b.item.id = :itemId")
-    Bid findByUserIdAndBidId(@Param("userId") Long userId, @Param("itemId") Long itemId);
+    Bid findByUserIdAndItemId(@Param("userId") Long userId, @Param("itemId") Long itemId);
 
     @Query("SELECT COUNT(b.id) from Bid b where b.user.id = :userId")
     long countByUserId(@Param("userId") Long userId);
