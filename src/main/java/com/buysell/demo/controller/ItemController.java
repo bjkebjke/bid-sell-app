@@ -90,7 +90,7 @@ public class ItemController {
 
 
 
-
+    /*
     @RequestMapping(value = "/{id}")
     public String itemPage(Model model, @PathVariable("id") Long itemId) {
         Item i = itemService.get(itemId);
@@ -112,6 +112,7 @@ public class ItemController {
 
         return "basicitem";
     }
+    */
 
     @RequestMapping(value = "/new")
     public String newItem(Model model, Authentication auth) {

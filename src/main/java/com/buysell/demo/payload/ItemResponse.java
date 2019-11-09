@@ -19,6 +19,18 @@ public class ItemResponse {
     private Bid newBid;
     private Bid topBid;
 
+    public ItemResponse(Long id, String itemName, String description, UserSummary createdBy, Instant creationDateTime, Instant expirationDateTime, Boolean isExpired, Bid newBid, Bid topBid) {
+        this.id = id;
+        this.itemName = itemName;
+        this.description = description;
+        this.createdBy = createdBy;
+        this.creationDateTime = creationDateTime;
+        this.expirationDateTime = expirationDateTime;
+        this.isExpired = isExpired;
+        this.newBid = newBid;
+        this.topBid = topBid;
+    }
+
     public Bid getNewBid() {
         return newBid;
     }
