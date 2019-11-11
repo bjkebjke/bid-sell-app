@@ -1,6 +1,10 @@
-package com.buysell.demo.entity;
+package com.buysell.demo.model;
 
-import com.buysell.demo.entity.audit.UserDateAudit;
+import com.buysell.demo.model.audit.UserDateAudit;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -16,8 +20,7 @@ import java.util.Objects;
 public class Item extends UserDateAudit {
 
     @Id
-    @GeneratedValue
-    @Column(name = "itemid")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
@@ -28,30 +31,26 @@ public class Item extends UserDateAudit {
     @Size(max = 100)
     private String description;
 
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinColumn(name = "itemid", referencedColumnName = "itemid")
+    @OneToMany(
+            mappedBy = "item",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
+            orphanRemoval = true
+    )
+    @Fetch(FetchMode.SELECT)
+    @JsonManagedReference
     private List<Bid> bids = new ArrayList<>();
 
     // edit later?
     private Bid topBid;
 
-    private Long userid;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @NotNull
     private Instant expirationDateTime;
-
-    public Item() {}
-
-    public Item(String itemName, List<Bid> bids, Long userid, String description) {
-        this.itemName = itemName;
-        this.bids = bids;
-        this.userid = userid;
-        this.description = description;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -66,15 +65,8 @@ public class Item extends UserDateAudit {
         return Objects.hash(id);
     }
 
-    @Override
-    public String toString() {
-        return "Item{" +
-                "id=" + id +
-                ", itemName='" + itemName + '\'' +
-                ", description='" + description + '\'' +
-                ", bids=" + bids +
-                ", userid=" + userid +
-                '}';
+    public void addBid(Bid bid) {
+        this.bids.add(bid);
     }
 
     public Bid getTopBid() {
@@ -123,14 +115,6 @@ public class Item extends UserDateAudit {
 
     public void setBids(List<Bid> bids) {
         this.bids = bids;
-    }
-
-    public Long getUserid() {
-        return userid;
-    }
-
-    public void setUserid(Long userid) {
-        this.userid = userid;
     }
 
     public String getDescription() {

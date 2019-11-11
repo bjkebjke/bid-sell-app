@@ -3,7 +3,7 @@ import {getAllItems, getUserCreatedItems, getUserBiddedItems} from '../util/APIU
 import ItemListing from './ItemListing'
 
 import LoadingIndicator  from '../common/LoadingIndicator';
-import { Button, Icon, notification } from 'antd';
+import { Button, Icon, notification, Card } from 'antd';
 import { ITEM_LIST_SIZE } from '../constants';
 import { withRouter } from 'react-router-dom';
 import './ItemList.css';
@@ -103,7 +103,10 @@ class ItemList extends Component {
 
         return (
             <div className="items-container">
-                {itemViews}
+                <Card>
+                    {itemViews}
+                </Card>
+
                 {
                     !this.state.isLoading && this.state.items.length === 0 ? (
                         <div className="no-items-found">

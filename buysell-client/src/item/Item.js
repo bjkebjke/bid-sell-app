@@ -1,23 +1,27 @@
 import React, { Component } from 'react';
 import './Item.css';
-import { Avatar, Icon } from 'antd';
+import { Avatar, Icon, Layout, Button, Row, Col, InputNumber, notification } from 'antd';
 import { Link } from 'react-router-dom';
 import { getAvatarColor } from '../util/Colors';
 import { formatDateTime } from '../util/Helpers';
 import productImage from '../item-image-placeholder.svg';
-import {getItem} from '../util/APIUtils';
+import {getItem, makeBid} from '../util/APIUtils';
+import LoadingIndicator from "../common/LoadingIndicator";
 
+const { Header, Footer, Sider, Content } = Layout;
 
-import { Button } from 'antd';
 
 class Item extends Component {
     constructor(props) {
         super(props);
         this.state = {
             item: null,
-            isLoading: false
+            isLoading: true,
+            newBid: 0
         }
         this.loadItem = this.loadItem.bind(this);
+        this.onBidValChange = this.onBidValChange.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     }
 
     getTimeRemaining = (item) => {
@@ -51,7 +55,6 @@ class Item extends Component {
         this.setState({
             isLoading: true
         });
-
         getItem(itemId)
             .then(response => {
                 this.setState({
@@ -73,71 +76,106 @@ class Item extends Component {
         });
     }
 
+    onBidValChange(value) {
+        this.setState({
+            newBid: value
+        });
+    }
+
+    onSubmit(event) {
+        event.preventDefault();
+        if(!this.props.isAuthenticated) {
+            this.props.history.push("/login");
+            notification.info({
+                message: 'Marketplace App',
+                description: "Please login to bid on item.",
+            });
+            return;
+        }
+
+        const item = this.state.item;
+        const newBid = this.state.newBid;
+
+        const bidData = {
+            itemId: item.id,
+            bidVal: newBid
+        };
+
+        makeBid(bidData)
+            .then(response => {
+                this.setState({
+                    item: response
+                });
+            }).catch(error => {
+            if(error.status === 401) {
+                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login to bid');
+            } else {
+                notification.error({
+                    message: 'Marketplace App',
+                    description: error.message || 'Sorry! Something went wrong. Please try again!'
+                });
+            }
+        });
+    }
+
     componentDidMount() {
-        const itemId = this.props.match.params.itemId;
+        const {itemId} = this.props.match.params;
         this.loadItem(itemId);
     }
 
     render() {
+        if(this.state.isLoading) {
+            return <LoadingIndicator />
+        }
+        /*
         if(this.state.item.selectedChoice || this.state.item.expired) {
             // logic for already bidded or expired item
         } else {
             // logic for non expired item
         }
+        */
+        console.log(this.state.item.bids);
+        const maxBid = this.state.item.bids.length === 0 ? 0 : Math.max.apply(Math, this.state.item.bids.map(function(o) { return o.bidVal; }));
         return (
-            <div className="item-content">
-                <div className="item-header">
-                    <div className="item-creator-info">
-                        <Link className="creator-link" to={`/users/${this.state.item.createdBy.username}`}>
-                            <Avatar className="item-creator-avatar"
+            <Layout>
+                <Header> {this.state.item.itemName}</Header>
+                <Layout>
+                    <Sider><img src={productImage} alt="image placeholder" className="item-image"/></Sider>
+                    <Layout>
+                        <Content>{this.state.item.description}</Content>
+                        <Sider>
+                            <Row>
+                                Top bid is : {maxBid}
+                            </Row>
+                            <Row>
+                                <InputNumber min={0} onChange={this.onBidValChange}/>
+                            </Row>
+                            <Row>
+                                <Button type="primary" onClick={this.onSubmit}>Make new bid</Button>
+                            </Row>
+                        </Sider>
+                    </Layout>
+                </Layout>
+                <Footer>
+                    <Link className="creator-link" to={`/users/${this.state.item.createdBy.username}`}>
+                        <Col span={6}>
+                            <Avatar className="poll-creator-avatar"
                                     style={{ backgroundColor: getAvatarColor(this.state.item.createdBy.name)}} >
                                 {this.state.item.createdBy.name[0].toUpperCase()}
                             </Avatar>
-                            <span className="item-creator-name">
-                                {this.state.item.createdBy.name}
-                            </span>
-                            <span className="item-creator-username">
-                                @{this.state.item.createdBy.username}
-                            </span>
-                            <span className="item-creation-date">
-                                {formatDateTime(this.state.item.creationDateTime)}
-                            </span>
-                        </Link>
-                    </div>
-                    <div className="item-name">
-                        {this.props.item.itemName}
-                    </div>
-                </div>
-                /*item description here */
-                <div className="item-body">
-                    <div className="item-icon">
-                        <img src={productImage} alt="image placeholder" className="item-image"/>
-                    </div>
-                    <div className="item-description">
-                        {this.props.item.description}
-                    </div>
-                    <div className="item-bid">
-                        /* item's top bid here */
-                        {this.props.item.topBid.bidVal}
-                    </div>
-                </div>
-                <div className="item-footer">
-                    /*
-                    {
-                        !(this.props.poll.selectedChoice || this.props.poll.expired) ?
-                            (<Button className="vote-button" disabled={!this.props.currentVote} onClick={this.props.handleVoteSubmit}>Vote</Button>) : null
-                    }
-                    <span className="total-bids">{this.props.item.totalBids} bids</span>
-                    <span className="separator">•</span>
-                    <span className="time-left">
-                        {
-                            this.props.item.expired ? "Final results" :
-                                this.getTimeRemaining(this.props.item)
-                        }
-                    </span>
-                    */
-                </div>
-            </div>
+                        </Col>
+                        <Col span={6}>
+                            {this.state.item.createdBy.name}
+                        </Col>
+                        <Col span={6}>
+                            @{this.state.item.createdBy.username}
+                        </Col>
+                        <Col span={6}>
+                            {formatDateTime(this.state.item.creationDateTime)}
+                        </Col>
+                    </Link>
+                </Footer>
+            </Layout>
         );
     }
 }

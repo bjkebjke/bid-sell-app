@@ -1,8 +1,8 @@
 package com.buysell.demo.controller;
 
-import com.buysell.demo.entity.Role;
-import com.buysell.demo.entity.RoleName;
-import com.buysell.demo.entity.User;
+import com.buysell.demo.model.Role;
+import com.buysell.demo.model.RoleName;
+import com.buysell.demo.model.User;
 import com.buysell.demo.exception.AppException;
 import com.buysell.demo.payload.ApiResponse;
 import com.buysell.demo.payload.JwtAuthenticationResponse;

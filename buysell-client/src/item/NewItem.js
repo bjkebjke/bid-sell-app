@@ -23,8 +23,8 @@ class NewItem extends Component {
             }
         };
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleNameChange = this.handleNameChange().bind(this);
-        this.handleDescriptionChange = this.handleDescriptionChange().bind(this);
+        this.handleNameChange = this.handleNameChange.bind(this);
+        this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
         this.handleItemDaysChange = this.handleItemDaysChange.bind(this);
         this.handleItemHoursChange = this.handleItemHoursChange.bind(this);
         this.isFormInvalid = this.isFormInvalid.bind(this);
@@ -33,10 +33,8 @@ class NewItem extends Component {
     handleSubmit(event) {
         event.preventDefault();
         const itemData = {
-            question: this.state.question.text,
-            choices: this.state.choices.map(choice => {
-                return {text: choice.text}
-            }),
+            itemName: this.state.itemName.text,
+            description: this.state.description.text,
             itemLength: this.state.itemLength
         };
 
@@ -74,6 +72,21 @@ class NewItem extends Component {
         }
     }
 
+    validateDescription = (descriptionText) => {
+        if(descriptionText.length === 0) {
+            return {
+                validateStatus: 'error',
+                errorMsg: 'Please enter a description!'
+            }
+        } else {
+            return {
+                validateStatus: 'success',
+                errorMsg: null
+            }
+        }
+    }
+
+
     handleNameChange(event) {
         const value = event.target.value;
         this.setState({
@@ -89,6 +102,7 @@ class NewItem extends Component {
         this.setState({
             description: {
                 text: value,
+                ...this.validateDescription(value)
             }
         });
     }
@@ -108,15 +122,11 @@ class NewItem extends Component {
     }
 
     isFormInvalid() {
-        if(this.state.question.validateStatus !== 'success') {
+        if(this.state.itemName.validateStatus !== 'success') {
             return true;
         }
-
-        for(let i = 0; i < this.state.choices.length; i++) {
-            const choice = this.state.choices[i];
-            if(choice.validateStatus !== 'success') {
-                return true;
-            }
+        if(this.state.description.validateStatus !== 'success') {
+            return true;
         }
     }
 
@@ -126,7 +136,7 @@ class NewItem extends Component {
                 <h1 className="page-title">Create Item</h1>
                 <div className="new-item-content">
                     <Form onSubmit={this.handleSubmit} className="create-item-form">
-                        <FormItem validateStatus={this.state.question.validateStatus}
+                        <FormItem validateStatus={this.state.itemName.validateStatus}
                                   help={this.state.itemName.errorMsg} className="item-form-row">
                             <TextArea
                                 placeholder="Enter your item name"

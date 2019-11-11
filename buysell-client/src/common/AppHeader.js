@@ -31,7 +31,7 @@ class AppHeader extends Component {
                 </Menu.Item>,
                 <Menu.Item key="/item/new">
                     <Link to="/item/new">
-                        <img src={newItemIcon} alt="item" className="item-icon" />
+                        <Icon type="upload" className="nav-icon" />
                     </Link>
                 </Menu.Item>,
                 <Menu.Item key="/profile" className="profile-menu">

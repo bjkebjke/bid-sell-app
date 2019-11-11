@@ -16,6 +16,10 @@ import NewItem from '../item/NewItem';
 import ItemList from '../item/ItemList'
 import PrivateRoute from '../common/PrivateRoute';
 
+import Login from '../user/login/Login';
+import Signup from '../user/signup/Signup';
+import Profile from '../user/profile/Profile';
+import NotFound from '../common/NotFound';
 
 import { Layout, notification } from 'antd';
 const { Content } = Layout;
@@ -112,7 +116,21 @@ class App extends Component {
                        render={(props) => <Item isAuthenticated={this.state.isAuthenticated}
                                                 currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} /> }>
                 </Route>
-                <PrivateRoute authenticated={this.state.isAuthenticated} path="/items/new" component={NewItem} handleLogout={this.handleLogout}></PrivateRoute>
+                <Route path="/login"
+                       render={(props) => <Login onLogin={this.handleLogin} {...props} />}>
+                </Route>
+                <Route path="/signup"
+                       component={Signup}>
+                </Route>
+                <Route path="/users/:username"
+                       render={(props) => <Profile isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}>
+                </Route>
+                <PrivateRoute authenticated={this.state.isAuthenticated} path="/item/new" component={NewItem} handleLogout={this.handleLogout}>
+
+                </PrivateRoute>
+                <Route component={NotFound}>
+
+                </Route>
               </Switch>
             </div>
           </Content>

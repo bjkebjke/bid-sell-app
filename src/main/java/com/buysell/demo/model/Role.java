@@ -1,4 +1,4 @@
-package com.buysell.demo.entity;
+package com.buysell.demo.model;
 
 import org.hibernate.annotations.NaturalId;
 

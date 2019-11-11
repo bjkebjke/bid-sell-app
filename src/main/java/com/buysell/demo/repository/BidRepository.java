@@ -1,12 +1,12 @@
 package com.buysell.demo.repository;
 
-import com.buysell.demo.entity.Bid;
+import com.buysell.demo.model.Bid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,6 +24,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     @Query("SELECT b FROM Bid b where b.user.id = :userId and b.item.id in :itemIds")
     List<Bid> findByUserIdAndItemIdIn(@Param("userId") Long userId, @Param("itemIds") List<Long> itemIds);
 
+    @Nullable
     @Query("SELECT b FROM Bid b where b.user.id = :userId and b.item.id = :itemId")
     Bid findByUserIdAndItemId(@Param("userId") Long userId, @Param("itemId") Long itemId);
 
@@ -32,5 +33,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
 
     @Query("SELECT b.item.id FROM Bid b WHERE b.user.id = :userId")
     Page<Long> findBiddedItemIdsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    Boolean existsBidByUseridAndItemid(Long userId, Long itemId);
 
 }

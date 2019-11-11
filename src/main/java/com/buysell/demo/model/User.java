@@ -1,10 +1,10 @@
-package com.buysell.demo.entity;
+package com.buysell.demo.model;
 
-import com.buysell.demo.entity.audit.DateAudit;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.buysell.demo.model.audit.DateAudit;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -13,14 +13,17 @@ import javax.validation.constraints.Size;
 import java.util.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {
+                "username"
+        }),
+        @UniqueConstraint(columnNames = {
+                "email"
+        })
+})
 public class User extends DateAudit {
-
-    public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
-
     @Id
-    @GeneratedValue
-    @Column(name = "userid")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
@@ -47,38 +50,33 @@ public class User extends DateAudit {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinColumn(name = "userid", referencedColumnName = "userid")
-    private List<Bid> bids = new ArrayList<>();
-
-    /*
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinColumn(name = "userid", referencedColumnName = "userid")
-    private List<Item> items = new ArrayList<>();
-    */
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
             fetch = FetchType.EAGER,
             orphanRemoval = true
     )
+    @Fetch(FetchMode.SELECT)
+    @JsonManagedReference
+    private List<Bid> bids = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
+            orphanRemoval = true
+    )
+    @Fetch(FetchMode.SELECT)
+    @JsonManagedReference
     private List<Item> items = new ArrayList<>();
 
-    protected User() {}
+    public User() {}
 
     public User(String name, String username, String email, String password) {
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
-    }
-
-    public User(String name, List<Bid> bids, List<Item> items, String password, Set<Role> roles) {
-        this.name = name;
-        this.bids = bids;
-        this.items = items;
-        this.setPassword(password);
-        this.roles = roles;
     }
 
     @Override
@@ -138,7 +136,7 @@ public class User extends DateAudit {
     }
 
     public void setPassword(String password) {
-        this.password = PASSWORD_ENCODER.encode(password);
+        this.password = password;
     }
 
     public String getUsername() {

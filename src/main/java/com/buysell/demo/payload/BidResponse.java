@@ -1,7 +1,7 @@
 package com.buysell.demo.payload;
 
-import com.buysell.demo.entity.Item;
-import com.buysell.demo.entity.User;
+import com.buysell.demo.model.Item;
+import com.buysell.demo.model.User;
 
 public class BidResponse {
     private Long id;

@@ -25,7 +25,7 @@ const request = (options) => {
 
 export function getItem(itemId) {
     return request({
-        url: API_BASE_URL + "/items" + itemId,
+        url: API_BASE_URL + "/items/" + itemId,
         method: 'GET'
     });
 }

@@ -1,4 +1,4 @@
-package com.buysell.demo.entity;
+package com.buysell.demo.model;
 
 public enum RoleName {
     ROLE_USER,

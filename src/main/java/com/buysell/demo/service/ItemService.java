@@ -1,8 +1,8 @@
 package com.buysell.demo.service;
 
-import com.buysell.demo.entity.Bid;
-import com.buysell.demo.entity.Item;
-import com.buysell.demo.entity.User;
+import com.buysell.demo.model.Bid;
+import com.buysell.demo.model.Item;
+import com.buysell.demo.model.User;
 import com.buysell.demo.exception.BadRequestException;
 import com.buysell.demo.exception.ResourceNotFoundException;
 import com.buysell.demo.payload.BidRequest;
@@ -18,7 +18,6 @@ import com.buysell.demo.util.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class ItemService {
 
     @Autowired
@@ -63,14 +61,11 @@ public class ItemService {
 
         // Map Items to ItemResponses
         List<Long> itemIds = items.map(Item::getId).getContent();
-        
-        Map<Long, Bid> itemUserBidMap = getItemUserBidMap(currentUser, itemIds);
         Map<Long, User> creatorMap = getItemCreatorMap(items.getContent());
 
         List<ItemResponse> itemResponses = items.map(item -> {
             return ModelMapper.mapItemToItemResponse(item,
-                    creatorMap.get(item.getCreatedBy()),
-                    itemUserBidMap == null ? null : itemUserBidMap.getOrDefault(item.getId(), null));
+                    creatorMap.get(item.getCreatedBy()));
         }).getContent();
 
         return new PagedResponse<ItemResponse>(
@@ -100,14 +95,11 @@ public class ItemService {
 
         // Map Items to ItemResponses
         List<Long> itemIds = items.map(Item::getId).getContent();
-
-        Map<Long, Bid> itemUserBidMap = getItemUserBidMap(currentUser, itemIds);
         Map<Long, User> creatorMap = getItemCreatorMap(items.getContent());
 
         List<ItemResponse> itemResponses = items.map(item -> {
             return ModelMapper.mapItemToItemResponse(item,
-                    creatorMap.get(item.getCreatedBy()),
-                    itemUserBidMap == null ? null : itemUserBidMap.getOrDefault(item.getId(), null));
+                    creatorMap.get(item.getCreatedBy()));
         }).getContent();
 
         return new PagedResponse<ItemResponse>(
@@ -142,14 +134,13 @@ public class ItemService {
         Sort sort = new Sort(Sort.Direction.DESC, "createdAt");
         List<Item> items = itemRepository.findByIdIn(pollIds, sort);
 
+        //update later
         // Map Items to ItemResponses containing vote counts and poll creator details
-        Map<Long, Bid> itemUserBidMap = getItemUserBidMap(currentUser, pollIds);
         Map<Long, User> creatorMap = getItemCreatorMap(items);
 
         List<ItemResponse> itemResponses = items.stream().map(item -> {
             return ModelMapper.mapItemToItemResponse(item,
-                    creatorMap.get(item.getCreatedBy()),
-                    itemUserBidMap == null ? null : itemUserBidMap.getOrDefault(item.getId(), null));
+                    creatorMap.get(item.getCreatedBy()));
         }).collect(Collectors.toList());
 
         return new PagedResponse<ItemResponse>(
@@ -166,6 +157,7 @@ public class ItemService {
         Item item = new Item();
         item.setItemName(itemRequest.getItemName());
         item.setDescription(itemRequest.getDescription());
+        item.setUser(userRepository.getOne(itemRequest.getUserId()));
 
         Instant now = Instant.now();
         Instant expirationDateTime = now.plus(Duration.ofDays(itemRequest.getItemLength().getDays()))
@@ -180,20 +172,13 @@ public class ItemService {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new ResourceNotFoundException("Item", "id", itemId));
 
-        // Retrieve poll creator details
+        // Retrieve item creator details
         User creator = userRepository.findById(item.getCreatedBy())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", item.getCreatedBy()));
 
-        // Retrieve vote done by logged in user
-        Bid userBid = null;
-        if(currentUser != null) {
-            userBid = bidRepository.findByUserIdAndItemId(currentUser.getId(), itemId);
-        }
-
         return ModelMapper.mapItemToItemResponse(
                 item,
-                creator,
-                userBid
+                creator
         );
     }
 
@@ -214,12 +199,15 @@ public class ItemService {
 
         bid = bidRepository.save(bid);
 
+        item.addBid(bid);
+        itemRepository.save(item);
+
         // Bid posted, Return the updated Item Response
         // Retrieving item creator details
         User creator = userRepository.findById(item.getCreatedBy())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", item.getCreatedBy()));
 
-        return ModelMapper.mapItemToItemResponse(item, creator, bid);
+        return ModelMapper.mapItemToItemResponse(item, creator);
     }
 
     private void validatePageNumberAndSize(int page, int size) {
@@ -230,18 +218,6 @@ public class ItemService {
         if(size > AppConstants.MAX_PAGE_SIZE) {
             throw new BadRequestException("Page size must not be greater than " + AppConstants.MAX_PAGE_SIZE);
         }
-    }
-
-    private Map<Long, Bid> getItemUserBidMap(UserPrincipal currentUser, List<Long> itemIds) {
-        // Retrieve Bids done by the logged in user to the given itemIds
-        Map<Long, Bid> itemUserBidMap = null;
-        if(currentUser != null) {
-            List<Bid> userBids = bidRepository.findByUserIdAndItemIdIn(currentUser.getId(), itemIds);
-
-            itemUserBidMap = userBids.stream()
-                    .collect(Collectors.toMap(bid -> bid.getItem().getId(), bid -> bid));
-        }
-        return itemUserBidMap;
     }
 
     Map<Long, User> getItemCreatorMap(List<Item> items) {
@@ -256,31 +232,5 @@ public class ItemService {
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return creatorMap;
-    }
-
-
-
-    // OLD
-
-
-
-    public void save(Item item) {
-        itemRepository.save(item);
-    }
-
-    public List<Item> listAll() {
-        return (List<Item>) itemRepository.findAll();
-    }
-
-    public Item get(Long id) {
-        return itemRepository.findById(id).get();
-    }
-
-    public void delete(Long id) {
-        itemRepository.deleteById(id);
-    }
-
-    public List<Item> getByUser_id(Long userid) {
-        return itemRepository.findByUserid(userid);
     }
 }

@@ -1,4 +1,4 @@
-package com.buysell.demo.entity.audit;
+package com.buysell.demo.model.audit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedBy;

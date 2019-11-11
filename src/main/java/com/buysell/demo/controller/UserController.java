@@ -1,6 +1,6 @@
 package com.buysell.demo.controller;
 
-import com.buysell.demo.entity.User;
+import com.buysell.demo.model.User;
 import com.buysell.demo.exception.ResourceNotFoundException;
 import com.buysell.demo.payload.*;
 import com.buysell.demo.repository.BidRepository;

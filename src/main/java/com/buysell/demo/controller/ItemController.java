@@ -1,55 +1,34 @@
 package com.buysell.demo.controller;
 
-import com.buysell.demo.entity.Bid;
-import com.buysell.demo.entity.Item;
-import com.buysell.demo.model.BidDAO;
-import com.buysell.demo.model.ItemDAO;
+import com.buysell.demo.model.Item;
 import com.buysell.demo.payload.*;
-import com.buysell.demo.repository.BidRepository;
-import com.buysell.demo.repository.ItemRepository;
-import com.buysell.demo.repository.UserRepository;
 import com.buysell.demo.security.CurrentUser;
 import com.buysell.demo.security.UserPrincipal;
 import com.buysell.demo.service.ItemService;
-import com.buysell.demo.service.UserService;
 import com.buysell.demo.util.AppConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Collections;
 
 @Controller
-@RequestMapping(value = "/items")
+@RequestMapping(value = "/api/items")
 public class ItemController {
-
-    @Autowired
-    private ItemRepository itemRepository;
-
-    @Autowired
-    private BidRepository bidRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     @Autowired
     private ItemService itemService;
 
-    @Autowired
-    UserService userService;
-
     @GetMapping
+    @ResponseBody
     public PagedResponse<ItemResponse> getItems(@CurrentUser UserPrincipal currentUser,
                                                 @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
                                                 @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size) {
@@ -58,8 +37,10 @@ public class ItemController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> postItem(@Valid @RequestBody ItemRequest itemRequest) {
+    public ResponseEntity<?> postItem(@Valid @RequestBody ItemRequest itemRequest, @CurrentUser UserPrincipal currentUser) {
+        itemRequest.setUserId(currentUser.getId());
         Item item = itemService.postItem(itemRequest);
+
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{pollId}")
@@ -70,6 +51,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
+    @ResponseBody
     public ItemResponse getItemById(@CurrentUser UserPrincipal currentUser,
                                     @PathVariable Long itemId) {
         return itemService.getItemById(itemId, currentUser);
@@ -77,18 +59,13 @@ public class ItemController {
 
     @PostMapping("/{itemId}/bids")
     @PreAuthorize("hasRole('USER')")
+    @ResponseBody
     public ItemResponse makeBid(@CurrentUser UserPrincipal currentUser,
                                  @PathVariable Long itemId,
                                  @Valid @RequestBody BidRequest bidRequest) {
         return itemService.makeBidAndGetUpdatedItem(itemId, bidRequest, currentUser);
     }
-
-
-
     //old
-
-
-
 
     /*
     @RequestMapping(value = "/{id}")
@@ -112,7 +89,7 @@ public class ItemController {
 
         return "basicitem";
     }
-    */
+
 
     @RequestMapping(value = "/new")
     public String newItem(Model model, Authentication auth) {
@@ -131,4 +108,5 @@ public class ItemController {
 
         return "success";
     }
+    */
 }

@@ -19,7 +19,7 @@ public class ItemRequest {
     @Valid
     private ItemLength itemLength;
 
-    @NotNull
+
     private Long userId;
 
     public Long getUserId() {

@@ -1,6 +1,5 @@
 package com.buysell.demo.configuration;
 
-import com.buysell.demo.entity.User;
 import com.buysell.demo.security.JwtAuthenticationEntryPoint;
 import com.buysell.demo.security.JwtAuthenticationFilter;
 import com.buysell.demo.security.MyUserDetailsService;
@@ -30,7 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private MyUserDetailsService userDetailsService;
+    MyUserDetailsService userDetailsService;
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -44,8 +43,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
         auth
-                .userDetailsService(this.userDetailsService)
-                .passwordEncoder(User.PASSWORD_ENCODER);
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
     }
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
@@ -74,6 +73,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .and()
                 .authorizeRequests()
                     .antMatchers("/",
+                        "/favicon.ico",
+                        "/**/*.png",
+                        "/**/*.gif",
+                        "/**/*.svg",
+                        "/**/*.jpg",
                         "/**/*.html",
                         "/**/*.css",
                         "/**/*.js")
@@ -82,7 +86,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         .permitAll()
                     .antMatchers("/api/user/checkUsernameAvailability", "/api/user/checkEmailAvailability")
                         .permitAll()
-                    .antMatchers(HttpMethod.GET, "/api/items/**", "/api/users/**")
+                    .antMatchers(HttpMethod.GET, "/api/polls/**", "/api/users/**")
                         .permitAll()
                     .anyRequest()
                         .authenticated();

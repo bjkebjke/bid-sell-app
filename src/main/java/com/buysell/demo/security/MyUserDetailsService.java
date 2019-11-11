@@ -1,6 +1,6 @@
 package com.buysell.demo.security;
 
-import com.buysell.demo.entity.User;
+import com.buysell.demo.model.User;
 import com.buysell.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     @Override
     @Transactional

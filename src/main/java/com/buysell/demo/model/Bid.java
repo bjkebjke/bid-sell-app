@@ -1,21 +1,17 @@
-package com.buysell.demo.entity;
+package com.buysell.demo.model;
 
-import com.buysell.demo.entity.audit.DateAudit;
+import com.buysell.demo.model.audit.DateAudit;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "bids", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {
-                "item_id",
-                "user_id"
-        })
-})
+@Table(name = "bids")
 public class Bid extends DateAudit implements Comparable<Bid> {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private int bidVal;
@@ -26,10 +22,12 @@ public class Bid extends DateAudit implements Comparable<Bid> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "item_id", nullable = false)
+    @JsonBackReference
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     public Bid() {}

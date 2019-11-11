@@ -1,6 +1,6 @@
 package com.buysell.demo.payload;
 
-import com.buysell.demo.entity.Bid;
+import com.buysell.demo.model.Bid;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.Instant;
@@ -18,17 +18,14 @@ public class ItemResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Bid newBid;
     private Bid topBid;
+    private List<Bid> bids;
 
-    public ItemResponse(Long id, String itemName, String description, UserSummary createdBy, Instant creationDateTime, Instant expirationDateTime, Boolean isExpired, Bid newBid, Bid topBid) {
-        this.id = id;
-        this.itemName = itemName;
-        this.description = description;
-        this.createdBy = createdBy;
-        this.creationDateTime = creationDateTime;
-        this.expirationDateTime = expirationDateTime;
-        this.isExpired = isExpired;
-        this.newBid = newBid;
-        this.topBid = topBid;
+    public List<Bid> getBids() {
+        return bids;
+    }
+
+    public void setBids(List<Bid> bids) {
+        this.bids = bids;
     }
 
     public Bid getNewBid() {
