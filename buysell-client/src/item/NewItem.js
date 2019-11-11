@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { createItem } from '../util/APIUtils';
-import { MAX_CHOICES, POLL_QUESTION_MAX_LENGTH, POLL_CHOICE_MAX_LENGTH } from '../constants';
+import { POLL_QUESTION_MAX_LENGTH } from '../constants';
 import './NewItem.css';
-import { Form, Input, Button, Icon, Select, Col, notification } from 'antd';
+import { Form, Input, Button, Select, Col, notification } from 'antd';
 const Option = Select.Option;
 const FormItem = Form.Item;
-const { TextArea } = Input
+const { TextArea } = Input;
 
 class NewItem extends Component {
     constructor(props) {

@@ -9,17 +9,18 @@ import {Link} from "react-router-dom";
 class ItemListing extends Component {
 
     render() {
+        const topBid = this.props.item.topBid === null ? 0 : this.props.item.topBid.bidVal;
         return (
             <Card.Grid>
                 <div className="listing-content">
                     <div className="item-image">
-                        <img src={productImage} alt="placeholder item image" className="item-image-icon"/>
+                        <img src={productImage} alt="placeholder" className="item-image-icon"/>
                     </div>
                     <div className="item-name">
                         <Link to={`/items/${this.props.item.id}`}>{this.props.item.itemName}</Link>
                     </div>
                     <div className="item-bid">
-                        {this.props.item.currentBid}
+                        ${topBid}
                     </div>
                 </div>
             </Card.Grid>

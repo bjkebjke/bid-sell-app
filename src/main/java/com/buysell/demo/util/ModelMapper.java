@@ -5,6 +5,8 @@ import com.buysell.demo.model.Item;
 import com.buysell.demo.model.User;
 import com.buysell.demo.payload.ItemResponse;
 import com.buysell.demo.payload.UserSummary;
+import com.buysell.demo.repository.BidRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 

@@ -176,6 +176,7 @@ public class ItemService {
         User creator = userRepository.findById(item.getCreatedBy())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", item.getCreatedBy()));
 
+
         return ModelMapper.mapItemToItemResponse(
                 item,
                 creator
@@ -200,14 +201,15 @@ public class ItemService {
         bid = bidRepository.save(bid);
 
         item.addBid(bid);
-        itemRepository.save(item);
+        item.setTopBid(bid);
+        Item newitem = itemRepository.save(item);
 
         // Bid posted, Return the updated Item Response
         // Retrieving item creator details
         User creator = userRepository.findById(item.getCreatedBy())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", item.getCreatedBy()));
 
-        return ModelMapper.mapItemToItemResponse(item, creator);
+        return ModelMapper.mapItemToItemResponse(newitem, creator);
     }
 
     private void validatePageNumberAndSize(int page, int size) {

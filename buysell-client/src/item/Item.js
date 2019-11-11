@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Item.css';
-import { Avatar, Icon, Layout, Button, Row, Col, InputNumber, notification } from 'antd';
+import { Avatar, Layout, Button, Row, Col, InputNumber, notification, Divider, Card } from 'antd';
 import { Link } from 'react-router-dom';
 import { getAvatarColor } from '../util/Colors';
 import { formatDateTime } from '../util/Helpers';
@@ -134,47 +134,65 @@ class Item extends Component {
             // logic for non expired item
         }
         */
-        console.log(this.state.item.bids);
-        const maxBid = this.state.item.bids.length === 0 ? 0 : Math.max.apply(Math, this.state.item.bids.map(function(o) { return o.bidVal; }));
+        const maxBid = this.state.item.topBid === null ? 0 : this.state.item.topBid.bidVal;
         return (
-            <Layout>
-                <Header> {this.state.item.itemName}</Header>
-                <Layout>
-                    <Sider><img src={productImage} alt="image placeholder" className="item-image"/></Sider>
-                    <Layout>
-                        <Content>{this.state.item.description}</Content>
-                        <Sider>
+            <Layout style={{ padding: '5% 20% 10%' }}>
+                <Sider style={{ padding: '0% 2% 0% 0%' }}>
+                    <img src={productImage} alt="placeholder" className="item-image"/>
+                </Sider>
+                <Layout style={{ padding: '0% 0% 0% 2%' }}>
+                    <Content tyle={{ padding: '0% 2% 0% 0%' }}>
+                        <Row>
+                            {this.state.item.itemName}
+                        </Row>
+                        <Divider/>
+                        <Row>
                             <Row>
-                                Top bid is : {maxBid}
+                                Description : {this.state.item.description}
                             </Row>
                             <Row>
-                                <InputNumber min={0} onChange={this.onBidValChange}/>
+                                Time left : {this.getTimeRemaining(this.state.item)}
+                            </Row>
+                        </Row>
+                        <Divider/>
+                        <Row>
+                            <Row>
+                                Current bid : ${maxBid}
                             </Row>
                             <Row>
-                                <Button type="primary" onClick={this.onSubmit}>Make new bid</Button>
+                                <Col span={2}>
+                                    <InputNumber min={0} onChange={this.onBidValChange}/>
+                                </Col>
+                                <Col span={2} offset={2}>
+                                    <Button type="primary" onClick={this.onSubmit}>Place bid</Button>
+                                </Col>
                             </Row>
-                        </Sider>
-                    </Layout>
+                        </Row>
+                    </Content>
+                    <Sider style={{ padding: '0% 0% 0% 2%' }}>
+                        <Card title = 'Seller information'>
+                            <Row>
+                                Name :  {this.state.item.createdBy.name}
+                            </Row>
+                            <Divider dashed={true}/>
+                            <Row>
+                                <Link className="creator-link" to={`/users/${this.state.item.createdBy.username}`}>
+                                    <Row>
+                                        <Col span={12}>
+                                            <Avatar className="poll-creator-avatar"
+                                                    style={{ backgroundColor: getAvatarColor(this.state.item.createdBy.name)}} >
+                                                {this.state.item.createdBy.name[0].toUpperCase()}
+                                            </Avatar>
+                                        </Col>
+                                        <Col span={12}>
+                                            @{this.state.item.createdBy.username}
+                                        </Col>
+                                    </Row>
+                                </Link>
+                            </Row>
+                        </Card>
+                    </Sider>
                 </Layout>
-                <Footer>
-                    <Link className="creator-link" to={`/users/${this.state.item.createdBy.username}`}>
-                        <Col span={6}>
-                            <Avatar className="poll-creator-avatar"
-                                    style={{ backgroundColor: getAvatarColor(this.state.item.createdBy.name)}} >
-                                {this.state.item.createdBy.name[0].toUpperCase()}
-                            </Avatar>
-                        </Col>
-                        <Col span={6}>
-                            {this.state.item.createdBy.name}
-                        </Col>
-                        <Col span={6}>
-                            @{this.state.item.createdBy.username}
-                        </Col>
-                        <Col span={6}>
-                            {formatDateTime(this.state.item.creationDateTime)}
-                        </Col>
-                    </Link>
-                </Footer>
             </Layout>
         );
     }

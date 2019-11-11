@@ -3,7 +3,7 @@ import {getAllItems, getUserCreatedItems, getUserBiddedItems} from '../util/APIU
 import ItemListing from './ItemListing'
 
 import LoadingIndicator  from '../common/LoadingIndicator';
-import { Button, Icon, notification, Card } from 'antd';
+import { Button, Icon, Card } from 'antd';
 import { ITEM_LIST_SIZE } from '../constants';
 import { withRouter } from 'react-router-dom';
 import './ItemList.css';
@@ -18,7 +18,6 @@ class ItemList extends Component {
             totalElements: 0,
             totalPages: 0,
             last: true,
-            currentBids: [],
             isLoading: false
         };
         this.loadItemList = this.loadItemList.bind(this);
@@ -48,7 +47,6 @@ class ItemList extends Component {
         promise
             .then(response => {
                 const items = this.state.items.slice();
-                const currentBids = this.state.currentBids.slice();
 
                 this.setState({
                     items: items.concat(response.content),
@@ -57,7 +55,6 @@ class ItemList extends Component {
                     totalElements: response.totalElements,
                     totalPages: response.totalPages,
                     last: response.last,
-                    currentBids: currentBids.concat(Array(response.content.length).fill(null)),
                     isLoading: false
                 })
             }).catch(error => {
@@ -81,7 +78,6 @@ class ItemList extends Component {
                 totalElements: 0,
                 totalPages: 0,
                 last: true,
-                currentBids: [],
                 isLoading: false
             });
             this.loadItemList();
@@ -95,10 +91,10 @@ class ItemList extends Component {
     render() {
         const itemViews = [];
         this.state.items.forEach((item, itemIndex) => {
+            console.log(item);
             itemViews.push(<ItemListing
                 key={item.id}
-                item={item}
-                currentBid={this.state.currentBids[itemIndex]}/>)
+                item={item}/>)
         });
 
         return (

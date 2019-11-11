@@ -42,6 +42,7 @@ public class Item extends UserDateAudit {
     private List<Bid> bids = new ArrayList<>();
 
     // edit later?
+    @OneToOne
     private Bid topBid;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
