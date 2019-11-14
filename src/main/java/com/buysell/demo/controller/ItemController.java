@@ -1,5 +1,6 @@
 package com.buysell.demo.controller;
 
+import com.buysell.demo.job.ExpirationJob;
 import com.buysell.demo.model.Item;
 import com.buysell.demo.payload.*;
 import com.buysell.demo.security.CurrentUser;
@@ -8,6 +9,7 @@ import com.buysell.demo.service.ImageService;
 import com.buysell.demo.service.ItemService;
 import com.buysell.demo.util.AppConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.UUID;
 
 @Controller
 @RequestMapping(value = "/api/items")
@@ -36,6 +42,9 @@ public class ItemController {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    private Scheduler scheduler;
 
     @GetMapping
     @ResponseBody
@@ -56,8 +65,18 @@ public class ItemController {
         itemRequest.setUserId(currentUser.getId());
         Item item = itemService.postItem(itemRequest);
 
+        // storing images
         for(MultipartFile image: files) {
             imageService.storeImage(image, item);
+        }
+
+        //scheduling Job upon item expiration time
+        try {
+            JobDetail jobDetail = buildJobDetail(item.getId());
+            Trigger trigger = buildJobTrigger(jobDetail, item.getExpirationDateTime());
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException ex) {
+            logger.error("Error scheduling expiration", ex);
         }
 
         URI location = ServletUriComponentsBuilder
@@ -82,5 +101,28 @@ public class ItemController {
                                  @PathVariable Long itemId,
                                  @Valid @RequestBody BidRequest bidRequest) {
         return itemService.makeBidAndGetUpdatedItem(itemId, bidRequest, currentUser);
+    }
+
+    private JobDetail buildJobDetail(Long itemId) {
+        JobDataMap jobDataMap = new JobDataMap();
+
+        jobDataMap.put("itemId", itemId);
+
+        return JobBuilder.newJob(ExpirationJob.class)
+                .withIdentity(UUID.randomUUID().toString(), "expiration-jobs")
+                .withDescription("Notify item bid winner")
+                .usingJobData(jobDataMap)
+                .storeDurably()
+                .build();
+    }
+
+    private Trigger buildJobTrigger(JobDetail jobDetail, Instant expirationTime) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity(jobDetail.getKey().getName(), "expiration-triggers")
+                .withDescription("Notify item bid winner Trigger")
+                .startAt(Date.from(expirationTime))
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                .build();
     }
 }
