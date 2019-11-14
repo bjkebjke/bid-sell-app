@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "items")
@@ -41,6 +42,16 @@ public class Item extends UserDateAudit {
     @JsonManagedReference
     private List<Bid> bids = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "item",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
+            orphanRemoval = true
+    )
+    @Fetch(FetchMode.SELECT)
+    @JsonManagedReference
+    private List<Image> images = new ArrayList<>();
+
     // edit later?
     @OneToOne
     private Bid topBid;
@@ -59,6 +70,20 @@ public class Item extends UserDateAudit {
         if (o == null || getClass() != o.getClass()) return false;
         Item item = (Item) o;
         return Objects.equals(id, item.id);
+    }
+
+    public List<String> getImageIds() {
+        return images.stream()
+                .map(image -> image.getId())
+                .collect(Collectors.toList());
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     @Override

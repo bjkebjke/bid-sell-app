@@ -1,6 +1,7 @@
 package com.buysell.demo.service;
 
 import com.buysell.demo.model.Bid;
+import com.buysell.demo.model.Image;
 import com.buysell.demo.model.Item;
 import com.buysell.demo.model.User;
 import com.buysell.demo.exception.BadRequestException;
@@ -10,6 +11,7 @@ import com.buysell.demo.payload.ItemRequest;
 import com.buysell.demo.payload.ItemResponse;
 import com.buysell.demo.payload.PagedResponse;
 import com.buysell.demo.repository.BidRepository;
+import com.buysell.demo.repository.ImageRepository;
 import com.buysell.demo.repository.ItemRepository;
 import com.buysell.demo.repository.UserRepository;
 import com.buysell.demo.security.UserPrincipal;
@@ -24,7 +26,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -44,6 +48,9 @@ public class ItemService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(ItemService.class);
 
@@ -165,7 +172,10 @@ public class ItemService {
 
         item.setExpirationDateTime(expirationDateTime);
 
-        return itemRepository.save(item);
+        //saving item
+        Item persistedItem = itemRepository.save(item);
+
+        return persistedItem;
     }
 
     public ItemResponse getItemById(Long itemId, UserPrincipal currentUser) {
@@ -198,10 +208,10 @@ public class ItemService {
         bid.setUser(user);
         bid.setItem(item);
 
-        bid = bidRepository.save(bid);
+        Bid persistedBid = bidRepository.save(bid);
 
-        item.addBid(bid);
-        item.setTopBid(bid);
+        item.addBid(persistedBid);
+        item.setTopBid(persistedBid);
         Item newitem = itemRepository.save(item);
 
         // Bid posted, Return the updated Item Response

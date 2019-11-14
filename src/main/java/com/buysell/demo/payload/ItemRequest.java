@@ -1,5 +1,7 @@
 package com.buysell.demo.payload;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -19,8 +21,20 @@ public class ItemRequest {
     @Valid
     private ItemLength itemLength;
 
-
     private Long userId;
+
+    /*
+    @NotNull
+    private MultipartFile[] files;
+
+    public MultipartFile[] getFiles() {
+        return files;
+    }
+
+    public void setFiles(MultipartFile[] files) {
+        this.files = files;
+    }
+    */
 
     public Long getUserId() {
         return userId;

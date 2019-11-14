@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import './Item.css';
-import { Avatar, Layout, Button, Row, Col, InputNumber, notification, Divider, Card } from 'antd';
+import {Avatar, Layout, Button, Row, Col, InputNumber, notification, Divider, Card, Carousel} from 'antd';
 import { Link } from 'react-router-dom';
 import { getAvatarColor } from '../util/Colors';
 import { formatDateTime } from '../util/Helpers';
 import productImage from '../item-image-placeholder.svg';
-import {getItem, makeBid} from '../util/APIUtils';
+import {getItem, makeBid, getImage} from '../util/APIUtils';
 import LoadingIndicator from "../common/LoadingIndicator";
 
 const { Header, Footer, Sider, Content } = Layout;
@@ -18,7 +18,7 @@ class Item extends Component {
             item: null,
             isLoading: true,
             newBid: 0
-        }
+        };
         this.loadItem = this.loadItem.bind(this);
         this.onBidValChange = this.onBidValChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -49,7 +49,7 @@ class Item extends Component {
         }
 
         return timeRemaining;
-    }
+    };
 
     loadItem(itemId) {
         this.setState({
@@ -61,7 +61,8 @@ class Item extends Component {
                     item: response,
                     isLoading: false
                 });
-            }).catch(error => {
+            })
+            .catch(error => {
             if(error.status === 404) {
                 this.setState({
                     notFound: true,
@@ -133,12 +134,24 @@ class Item extends Component {
         } else {
             // logic for non expired item
         }
+
+        <img src={productImage} alt="placeholder" className="item-image"/>
         */
         const maxBid = this.state.item.topBid === null ? 0 : this.state.item.topBid.bidVal;
+        const b64imgs = this.state.item.base64Images;
         return (
             <Layout style={{ padding: '5% 20% 10%' }}>
                 <Sider style={{ padding: '0% 2% 0% 0%' }}>
-                    <img src={productImage} alt="placeholder" className="item-image"/>
+                    <Carousel autoplay={true}>
+                        {b64imgs.map((img) => (
+                            /*
+                            <Card cover={<img src={"data:image/jpg;base64, " + img}/>}>
+
+                            </Card>
+                            */
+                            <img src={"data:image/jpg;base64, " + img}/>
+                        ))}
+                    </Carousel>
                 </Sider>
                 <Layout style={{ padding: '0% 0% 0% 2%' }}>
                     <Content tyle={{ padding: '0% 2% 0% 0%' }}>

@@ -90,8 +90,7 @@ class ItemList extends Component {
 
     render() {
         const itemViews = [];
-        this.state.items.forEach((item, itemIndex) => {
-            console.log(item);
+        this.state.items.forEach((item) => {
             itemViews.push(<ItemListing
                 key={item.id}
                 item={item}/>)

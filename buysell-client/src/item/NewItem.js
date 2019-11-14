@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { createItem } from '../util/APIUtils';
 import { POLL_QUESTION_MAX_LENGTH } from '../constants';
 import './NewItem.css';
-import { Form, Input, Button, Select, Col, notification } from 'antd';
+import { Form, Input, Button, Select, Col, notification, Upload, message, Icon } from 'antd';
 const Option = Select.Option;
 const FormItem = Form.Item;
 const { TextArea } = Input;
+const { Dragger } = Upload;
 
 class NewItem extends Component {
     constructor(props) {
@@ -20,13 +21,16 @@ class NewItem extends Component {
             itemLength: {
                 days: 1,
                 hours: 0
-            }
+            },
+            fileList:[],
+            uploading: false
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
         this.handleItemDaysChange = this.handleItemDaysChange.bind(this);
         this.handleItemHoursChange = this.handleItemHoursChange.bind(this);
+        this.handleImageUpload = this.handleImageUpload.bind(this);
         this.isFormInvalid = this.isFormInvalid.bind(this);
     }
 
@@ -35,10 +39,10 @@ class NewItem extends Component {
         const itemData = {
             itemName: this.state.itemName.text,
             description: this.state.description.text,
-            itemLength: this.state.itemLength
+            itemLength: this.state.itemLength,
         };
 
-        createItem(itemData)
+        createItem(itemData, this.state.fileList)
             .then(response => {
                 this.props.history.push("/");
             }).catch(error => {
@@ -46,7 +50,7 @@ class NewItem extends Component {
                 this.props.handleLogout('/login', 'error', 'You have been logged out. Please login create item.');
             } else {
                 notification.error({
-                    message: 'Iteming App',
+                    message: 'Marketplace App',
                     description: error.message || 'Sorry! Something went wrong. Please try again!'
                 });
             }
@@ -121,6 +125,10 @@ class NewItem extends Component {
         });
     }
 
+    handleImageUpload(info) {
+
+    }
+
     isFormInvalid() {
         if(this.state.itemName.validateStatus !== 'success') {
             return true;
@@ -131,6 +139,27 @@ class NewItem extends Component {
     }
 
     render() {
+        const { uploading, fileList } = this.state;
+        const uploadProps = {
+            onRemove: file => {
+                this.setState(state => {
+                    const index = state.fileList.indexOf(file);
+                    const newFileList = state.fileList.slice();
+                    newFileList.splice(index, 1);
+                    return {
+                        fileList: newFileList,
+                    };
+                });
+            },
+            beforeUpload: file => {
+                this.setState(state => ({
+                    fileList: [...state.fileList, file],
+                }));
+                return false;
+            },
+            fileList,
+        };
+
         return (
             <div className="new-item-container">
                 <h1 className="page-title">Create Item</h1>
@@ -191,6 +220,13 @@ class NewItem extends Component {
                                 </span>
                             </Col>
                         </FormItem>
+                        <Form.Item label="Upload images">
+                            <Upload {...uploadProps}>
+                                <Button>
+                                    <Icon type="upload" /> Select File
+                                </Button>
+                            </Upload>
+                        </Form.Item>
                         <FormItem className="item-form-row">
                             <Button type="primary"
                                     htmlType="submit"

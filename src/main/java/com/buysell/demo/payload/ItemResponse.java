@@ -19,6 +19,24 @@ public class ItemResponse {
     private Bid newBid;
     private Bid topBid;
     private List<Bid> bids;
+    private List<String> imageIds;
+    private List<String> base64Images;
+
+    public List<String> getBase64Images() {
+        return base64Images;
+    }
+
+    public void setBase64Images(List<String> base64Images) {
+        this.base64Images = base64Images;
+    }
+
+    public List<String> getImageIds() {
+        return imageIds;
+    }
+
+    public void setImageIds(List<String> imageIds) {
+        this.imageIds = imageIds;
+    }
 
     public List<Bid> getBids() {
         return bids;

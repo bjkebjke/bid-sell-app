@@ -4,8 +4,10 @@ import com.buysell.demo.model.Item;
 import com.buysell.demo.payload.*;
 import com.buysell.demo.security.CurrentUser;
 import com.buysell.demo.security.UserPrincipal;
+import com.buysell.demo.service.ImageService;
 import com.buysell.demo.service.ItemService;
 import com.buysell.demo.util.AppConstants;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +15,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 
 @Controller
 @RequestMapping(value = "/api/items")
 public class ItemController {
 
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
+
     private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     @Autowired
     private ItemService itemService;
+
+    @Autowired
+    private ImageService imageService;
 
     @GetMapping
     @ResponseBody
@@ -37,10 +47,18 @@ public class ItemController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> postItem(@Valid @RequestBody ItemRequest itemRequest, @CurrentUser UserPrincipal currentUser) {
+    public ResponseEntity<?> postItem(@CurrentUser UserPrincipal currentUser,
+                                      @RequestParam(value = "files") MultipartFile[] files,
+                                      @RequestParam(value = "itemRequest") String jsonRequest) throws IOException {
+
+        ItemRequest itemRequest = objectMapper.readValue(jsonRequest, ItemRequest.class);
+
         itemRequest.setUserId(currentUser.getId());
         Item item = itemService.postItem(itemRequest);
 
+        for(MultipartFile image: files) {
+            imageService.storeImage(image, item);
+        }
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{pollId}")
@@ -65,48 +83,4 @@ public class ItemController {
                                  @Valid @RequestBody BidRequest bidRequest) {
         return itemService.makeBidAndGetUpdatedItem(itemId, bidRequest, currentUser);
     }
-    //old
-
-    /*
-    @RequestMapping(value = "/{id}")
-    public String itemPage(Model model, @PathVariable("id") Long itemId) {
-        Item i = itemService.get(itemId);
-
-        if(i.getBids().size()>0){
-            Bid maxBid = Collections.max(i.getBids());
-            model.addAttribute("maxBid", maxBid);
-            model.addAttribute("existsMax", true);
-        } else {
-            model.addAttribute("existsMax", false);
-        }
-
-        ItemDAO itemDAO = new ItemDAO(i.getItemName(), i.getDescription());
-        BidDAO bidDAO = new BidDAO(itemId);
-
-        model.addAttribute("item", itemDAO);
-        model.addAttribute("bid", bidDAO);
-
-
-        return "basicitem";
-    }
-
-
-    @RequestMapping(value = "/new")
-    public String newItem(Model model, Authentication auth) {
-        ItemDAO item = new ItemDAO();
-
-        model.addAttribute("item", item);
-
-        return "newitem";
-    }
-
-    @RequestMapping(value = "save", method = RequestMethod.POST)
-    public String saveItem(@ModelAttribute ItemDAO dao, Authentication auth) {
-        Item item = new Item(dao.getName(), null, userService.get(auth.getName()).getId(), dao.getDescription());
-
-        itemService.save(item);
-
-        return "success";
-    }
-    */
 }

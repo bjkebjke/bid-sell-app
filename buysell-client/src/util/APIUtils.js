@@ -3,7 +3,7 @@ import {API_BASE_URL, ACCESS_TOKEN, ITEM_LIST_SIZE} from '../constants';
 const request = (options) => {
     const headers = new Headers({
         'Content-Type': 'application/json',
-    })
+    });
 
     if(localStorage.getItem(ACCESS_TOKEN)) {
         headers.append('Authorization', 'Bearer ' + localStorage.getItem(ACCESS_TOKEN))
@@ -23,6 +23,13 @@ const request = (options) => {
         );
 };
 
+export function getImage(imageId) {
+    return request({
+        url: API_BASE_URL + "/images/download/" + imageId,
+        method: 'GET'
+    });
+}
+
 export function getItem(itemId) {
     return request({
         url: API_BASE_URL + "/items/" + itemId,
@@ -40,12 +47,39 @@ export function getAllItems(page, size) {
     });
 }
 
-export function createItem(itemData) {
-    return request({
+export function createItem(itemData, images) {
+    console.log(images);
+    var formData = new FormData();
+    formData.append("itemRequest", JSON.stringify(itemData));
+
+    for(var index = 0; index < images.length; index++) {
+        formData.append("files", images[index]);
+    }
+
+    let options = {
         url: API_BASE_URL + "/items",
         method: 'POST',
-        body: JSON.stringify(itemData)
-    });
+        body: formData
+    };
+
+    const headers = new Headers();
+
+    if(localStorage.getItem(ACCESS_TOKEN)) {
+        headers.append('Authorization', 'Bearer ' + localStorage.getItem(ACCESS_TOKEN))
+    }
+
+    const defaults = {headers: headers};
+    options = Object.assign({}, defaults, options);
+
+    return fetch(options.url, options)
+        .then(response =>
+            response.json().then(json => {
+                if(!response.ok) {
+                    return Promise.reject(json);
+                }
+                return json;
+            })
+        );
 }
 
 export function makeBid(bidData) {
